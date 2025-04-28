@@ -1,3 +1,4 @@
+// models/Employee.js
 const mongoose = require('mongoose');
 
 const EmployeeSchema = new mongoose.Schema({
@@ -5,12 +6,35 @@ const EmployeeSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  employeeId: {
+    type: String,
+    required: true
+  },
+  department: {
+    type: String,
+    required: true
+  },
   position: {
     type: String,
     required: true
   },
-  salary: {
+  basicSalary: {
     type: Number,
+    required: true
+  },
+  allowance: {
+    type: Number,
+    default: 0
+  },
+  deduction: {
+    type: Number,
+    default: 0
+  },
+  netSalary: {
+    type: Number,
+  },
+  paymentDate: {
+    type: Date,
     required: true
   }
 });

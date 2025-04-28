@@ -1,7 +1,12 @@
+// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const dotenv = require('dotenv');
 const employeeRoutes = require('./routes/employeeRoutes');
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 
@@ -13,12 +18,12 @@ app.use(express.json());
 app.use('/api/employees', employeeRoutes);
 
 // MongoDB connection
-mongoose.connect('mongodb://127.0.0.1:27017/payroll-system', {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
 .then(() => console.log('MongoDB connected'))
-.catch(err => console.log(err));
+.catch(err => console.error('MongoDB connection error:', err));
 
 // Server listen
 const PORT = process.env.PORT || 5000;
