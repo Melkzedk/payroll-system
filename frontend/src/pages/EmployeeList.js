@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import employeeService from '../services/employeeService';
 import html2pdf from 'html2pdf.js';
+import emailjs from '@emailjs/browser';
 
 function EmployeeList() {
   const [employees, setEmployees] = useState([]);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
+  const [isSendingAll, setIsSendingAll] = useState(false);
   const payslipRef = useRef();
 
   useEffect(() => {
@@ -21,7 +23,7 @@ function EmployeeList() {
 
   const handleDownloadPayslip = () => {
     const element = payslipRef.current;
-    html2pdf().from(element).save(`${selectedEmployee.name}_payslip.pdf`);
+    html2pdf().from(element).save(`${selectedEmployee.fullName}_payslip.pdf`);
   };
 
   const handlePrintPayslip = () => {
@@ -34,9 +36,60 @@ function EmployeeList() {
     window.location.reload();
   };
 
+  const handleEmailPayslip = (employee = selectedEmployee) => {
+    if (!employee) return;
+
+    const templateParams = {
+      to_name: employee.fullName,
+      to_email: employee.email,
+      message: `
+        Payslip Details:
+
+        Name: ${employee.fullName}
+        Position: ${employee.position}
+        Department: ${employee.department}
+        Employee ID: ${employee.employeeId}
+        Basic Salary: $${employee.basicSalary}
+        Allowances: $${employee.allowances}
+        Deductions: $${employee.deductions}
+        Net Salary: $${employee.netSalary}
+        Payment Date: ${new Date(employee.paymentDate).toLocaleDateString()}
+      `
+    };
+
+    return emailjs.send(
+      'service_4rzlbw2',       // your EmailJS service ID
+      'service_nxnq06e',      // your EmailJS template ID
+      templateParams,
+      '4RQulCjXeHXEO8tH5'     // your EmailJS public key
+    );
+  };
+
+  const handleSendAllPayslips = async () => {
+    setIsSendingAll(true);
+    for (const emp of employees) {
+      try {
+        await handleEmailPayslip(emp);
+        console.log(`Payslip sent to ${emp.fullName}`);
+      } catch (err) {
+        console.error(`Failed to send payslip to ${emp.fullName}`, err);
+      }
+    }
+    setIsSendingAll(false);
+    alert('All payslips sent!');
+  };
+
   return (
     <div className="container mt-5">
       <h2>Employee List</h2>
+
+      <button
+        className="btn btn-danger mb-3"
+        onClick={handleSendAllPayslips}
+        disabled={isSendingAll}
+      >
+        {isSendingAll ? 'Sending...' : 'Send All Payslips'}
+      </button>
 
       <table className="table table-striped">
         <thead>
@@ -86,6 +139,9 @@ function EmployeeList() {
             </button>
             <button className="btn btn-success me-2" onClick={handlePrintPayslip}>
               Print Payslip
+            </button>
+            <button className="btn btn-warning me-2" onClick={() => handleEmailPayslip()}>
+              Send Email
             </button>
             <button className="btn btn-secondary" onClick={handleClosePayslip}>
               Close

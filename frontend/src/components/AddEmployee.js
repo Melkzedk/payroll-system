@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import employeeService from '../services/employeeService';
 
 function AddEmployee() {
@@ -13,6 +14,8 @@ function AddEmployee() {
     paymentDate: ''
   });
 
+  const navigate = useNavigate(); // ✅ Initialize navigation
+
   const handleChange = (e) => {
     setEmployee({ ...employee, [e.target.name]: e.target.value });
   };
@@ -20,7 +23,6 @@ function AddEmployee() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Calculate netSalary
     const netSalary = 
       Number(employee.basicSalary) + 
       Number(employee.allowance || 0) - 
@@ -32,17 +34,11 @@ function AddEmployee() {
     };
 
     await employeeService.addEmployee(newEmployee);
-    setEmployee({ 
-      name: '', 
-      employeeId: '',
-      department: '',
-      position: '', 
-      basicSalary: '', 
-      allowance: '', 
-      deduction: '', 
-      paymentDate: ''
-    });
+
     alert('Employee Added Successfully!');
+
+    // ✅ Redirect to Employee List page
+    navigate('/employee-list');
   };
 
   return (
