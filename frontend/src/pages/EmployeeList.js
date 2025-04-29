@@ -15,17 +15,17 @@ function EmployeeList() {
 
   const handleViewPayslip = (employee) => {
     setSelectedEmployee(employee);
-    document.body.style.overflow = 'hidden'; // prevent background scroll
+    document.body.style.overflow = 'hidden';
   };
 
   const handleClosePayslip = () => {
     setSelectedEmployee(null);
-    document.body.style.overflow = 'auto'; // restore scroll
+    document.body.style.overflow = 'auto';
   };
 
   const handleDownloadPayslip = () => {
     const element = payslipRef.current;
-    html2pdf().from(element).save(`${selectedEmployee.fullName}_payslip.pdf`);
+    html2pdf().from(element).save(`${selectedEmployee.name}_payslip.pdf`);
   };
 
   const handlePrintPayslip = () => {
@@ -42,28 +42,28 @@ function EmployeeList() {
     if (!employee) return;
 
     const templateParams = {
-      to_name: employee.fullName,
+      to_name: employee.name,
       to_email: employee.email,
       message: `
         Payslip Details:
 
-        Name: ${employee.fullName}
+        Name: ${employee.name}
         Position: ${employee.position}
         Department: ${employee.department}
         Employee ID: ${employee.employeeId}
         Basic Salary: $${employee.basicSalary}
-        Allowances: $${employee.allowances}
-        Deductions: $${employee.deductions}
+        Allowances: $${employee.allowance}
+        Deductions: $${employee.deduction}
         Net Salary: $${employee.netSalary}
         Payment Date: ${new Date(employee.paymentDate).toLocaleDateString()}
       `
     };
 
     return emailjs.send(
-      'service_4rzlbw2',       // your EmailJS service ID
-      'service_nxnq06e',      // your EmailJS template ID
+      'service_4rzlbw2',
+      'service_nxnq06e',
       templateParams,
-      '4RQulCjXeHXEO8tH5'     // your EmailJS public key
+      '4RQulCjXeHXEO8tH5'
     );
   };
 
@@ -72,9 +72,9 @@ function EmployeeList() {
     for (const emp of employees) {
       try {
         await handleEmailPayslip(emp);
-        console.log(`Payslip sent to ${emp.fullName}`);
+        console.log(`Payslip sent to ${emp.name}`);
       } catch (err) {
-        console.error(`Failed to send payslip to ${emp.fullName}`, err);
+        console.error(`Failed to send payslip to ${emp.name}`, err);
       }
     }
     setIsSendingAll(false);
@@ -106,7 +106,7 @@ function EmployeeList() {
           <tbody>
             {employees.map((emp) => (
               <tr key={emp._id}>
-                <td>{emp.fullName}</td>
+                <td>{emp.name}</td>
                 <td>{emp.position}</td>
                 <td>${emp.basicSalary}</td>
                 <td>
@@ -130,14 +130,14 @@ function EmployeeList() {
                 <button type="button" className="btn-close" onClick={handleClosePayslip}></button>
               </div>
               <div className="modal-body">
-                <p><strong>Employee Name:</strong> {selectedEmployee.fullName}</p>
+                <p><strong>Employee Name:</strong> {selectedEmployee.name}</p>
                 <p><strong>Position:</strong> {selectedEmployee.position}</p>
                 <p><strong>Department:</strong> {selectedEmployee.department}</p>
                 <p><strong>Employee ID:</strong> {selectedEmployee.employeeId}</p>
                 <hr />
                 <p><strong>Basic Salary:</strong> ${selectedEmployee.basicSalary}</p>
-                <p><strong>Allowances:</strong> ${selectedEmployee.allowances}</p>
-                <p><strong>Deductions:</strong> ${selectedEmployee.deductions}</p>
+                <p><strong>Allowances:</strong> ${selectedEmployee.allowance}</p>
+                <p><strong>Deductions:</strong> ${selectedEmployee.deduction}</p>
                 <hr />
                 <p><strong>Net Salary:</strong> ${selectedEmployee.netSalary}</p>
                 <p><strong>Payment Date:</strong> {new Date(selectedEmployee.paymentDate).toLocaleDateString()}</p>
