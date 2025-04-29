@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import employeeService from '../services/employeeService';
 import { useNavigate } from 'react-router-dom';
+import emailjs from '@emailjs/browser';
+
+const SERVICE_ID = 'service_9d5p3ud';
+const TEMPLATE_ID = 'service_nxnq06e';
+const PUBLIC_KEY = '4RQulCjXeHXEO8tH5';
 
 function EmployeeList() {
   const [employees, setEmployees] = useState([]);
@@ -20,8 +25,32 @@ function EmployeeList() {
     fetchEmployees();
   }, []);
 
+  const sendPayslip = (employee) => {
+    const templateParams = {
+      to_name: employee.name,
+      to_email: employee.email,
+      employee_id: employee.employeeId,
+      department: employee.department,
+      position: employee.position,
+      net_salary: `KES ${employee.netSalary}`,
+      payment_date: new Date(employee.paymentDate).toLocaleDateString(),
+    };
+
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY)
+      .then(() => {
+        alert(`Payslip sent to ${employee.name}`);
+      })
+      .catch((error) => {
+        console.error('EmailJS error:', error);
+        alert(`Failed to send payslip to ${employee.name}`);
+      });
+  };
+
   const handleSendAllPayslips = () => {
-    alert('Payslips sent to all employees!');
+    employees.forEach(emp => {
+      if (emp.status !== 'inactive') sendPayslip(emp);
+    });
+    alert('Payslips are being sent to all employees!');
   };
 
   const handleDeactivate = async (employeeId) => {
@@ -79,12 +108,12 @@ function EmployeeList() {
               </td>
               <td>
                 <div className="d-flex flex-column gap-1">
-                  <a 
-                    href={`mailto:${employee.email}`} 
+                  <button 
                     className="btn btn-sm btn-outline-primary"
+                    onClick={() => sendPayslip(employee)}
                   >
                     Send Email
-                  </a>
+                  </button>
                   <button 
                     className="btn btn-sm btn-outline-success"
                     onClick={() => navigate(`/payslip/${employee._id}`)}
