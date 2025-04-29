@@ -21,13 +21,22 @@ function EmployeeList() {
   }, []);
 
   const handleSendAllPayslips = () => {
-    // Placeholder — link to your actual bulk email logic
     alert('Payslips sent to all employees!');
   };
 
-  const handleDeactivate = (employeeId) => {
-    // You can replace this with an API call to update "status" in DB
-    alert(`Employee ${employeeId} deactivated.`);
+  const handleDeactivate = async (employeeId) => {
+    try {
+      await employeeService.deactivateEmployee(employeeId);
+      alert(`Employee ${employeeId} deactivated.`);
+      setEmployees((prev) =>
+        prev.map(emp =>
+          emp._id === employeeId ? { ...emp, status: 'inactive' } : emp
+        )
+      );
+    } catch (err) {
+      alert('Failed to deactivate employee.');
+      console.error(err);
+    }
   };
 
   return (
@@ -49,12 +58,13 @@ function EmployeeList() {
             <th>Position</th>
             <th>Net Salary</th>
             <th>Payment Date</th>
+            <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {employees.map((employee) => (
-            <tr key={employee._id}>
+            <tr key={employee._id} className={employee.status === 'inactive' ? 'table-secondary' : ''}>
               <td>{employee.name}</td>
               <td>{employee.employeeId}</td>
               <td>{employee.email}</td>
@@ -62,6 +72,11 @@ function EmployeeList() {
               <td>{employee.position}</td>
               <td>KES {employee.netSalary?.toLocaleString()}</td>
               <td>{new Date(employee.paymentDate).toLocaleDateString()}</td>
+              <td>
+                <span className={`badge ${employee.status === 'inactive' ? 'bg-danger' : 'bg-success'}`}>
+                  {employee.status || 'active'}
+                </span>
+              </td>
               <td>
                 <div className="d-flex flex-column gap-1">
                   <a 
@@ -76,12 +91,14 @@ function EmployeeList() {
                   >
                     View Payslip
                   </button>
-                  <button 
-                    className="btn btn-sm btn-outline-danger"
-                    onClick={() => handleDeactivate(employee._id)}
-                  >
-                    Deactivate
-                  </button>
+                  {employee.status !== 'inactive' && (
+                    <button 
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => handleDeactivate(employee._id)}
+                    >
+                      Deactivate
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>
