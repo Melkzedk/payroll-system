@@ -5,6 +5,7 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import AddEmployee from './components/AddEmployee';
 import EmployeeList from './pages/EmployeeList';
+import Payslip from './pages/Payslip'; // ✅ Import the Payslip component
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/add-employee" element={<AddEmployee />} />
             <Route path="/employee-list" element={<EmployeeList />} />
+            <Route path="/payslip/:id" element={<Payslip />} /> {/* ✅ Add this route */}
           </Routes>
         </div>
         <Footer />

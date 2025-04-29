@@ -11,10 +11,11 @@ function AddEmployee() {
     basicSalary: '', 
     allowance: '', 
     deduction: '', 
-    paymentDate: ''
+    paymentDate: '',
+    email: ''  // ➕ Added email
   });
 
-  const navigate = useNavigate(); // ✅ Initialize navigation
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setEmployee({ ...employee, [e.target.name]: e.target.value });
@@ -36,8 +37,6 @@ function AddEmployee() {
     await employeeService.addEmployee(newEmployee);
 
     alert('Employee Added Successfully!');
-
-    // ✅ Redirect to Employee List page
     navigate('/employee-list');
   };
 
@@ -47,6 +46,7 @@ function AddEmployee() {
       <form onSubmit={handleSubmit}>
         <input type="text" className="form-control mb-3" name="name" placeholder="Full Name" value={employee.name} onChange={handleChange} required />
         <input type="text" className="form-control mb-3" name="employeeId" placeholder="Employee ID" value={employee.employeeId} onChange={handleChange} required />
+        <input type="email" className="form-control mb-3" name="email" placeholder="Email Address" value={employee.email} onChange={handleChange} required />
         <input type="text" className="form-control mb-3" name="department" placeholder="Department" value={employee.department} onChange={handleChange} required />
         <input type="text" className="form-control mb-3" name="position" placeholder="Position" value={employee.position} onChange={handleChange} required />
         <input type="number" className="form-control mb-3" name="basicSalary" placeholder="Basic Salary" value={employee.basicSalary} onChange={handleChange} required />

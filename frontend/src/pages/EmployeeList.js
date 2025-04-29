@@ -1,31 +1,27 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import employeeService from '../services/employeeService';
-import html2pdf from 'html2pdf.js';
-import emailjs from '@emailjs/browser';
+import { useNavigate } from 'react-router-dom';
 
 function EmployeeList() {
   const [employees, setEmployees] = useState([]);
-  const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [isSendingAll, setIsSendingAll] = useState(false);
-  const payslipRef = useRef();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    employeeService.getEmployees().then(res => setEmployees(res.data));
+    async function fetchEmployees() {
+      const data = await employeeService.getEmployees();
+      if (Array.isArray(data)) {
+        setEmployees(data);
+      } else {
+        console.error("Expected array, got:", data);
+        setEmployees([]);
+      }
+    }
+
+    fetchEmployees();
   }, []);
 
-  const handleViewPayslip = (employee) => {
-    setSelectedEmployee(employee);
-    document.body.style.overflow = 'hidden';
-  };
-
-  const handleClosePayslip = () => {
-    setSelectedEmployee(null);
-    document.body.style.overflow = 'auto';
-  };
-
-  const handleDownloadPayslip = () => {
-    const element = payslipRef.current;
-    html2pdf().from(element).save(`${selectedEmployee.name}_payslip.pdf`);
+  const handleSendAllPayslips = () => {
+    alert('Payslips sent to all employees!');
   };
 
   const handlePrintPayslip = () => {
@@ -38,7 +34,7 @@ function EmployeeList() {
     window.location.reload();
   };
 
-  const handleEmailPayslip = async (employee = selectedEmployee) => {
+  const handleEmailPayslip = (employee = selectedEmployee) => {
     if (!employee) return;
 
     const templateParams = {
@@ -59,18 +55,12 @@ function EmployeeList() {
       `
     };
 
-    try {
-      await emailjs.send(
-        'service_4rzlbw2',       // ✅ Your service ID
-        'service_nxnq06e',       // ❌ This looks like a wrong template ID (should be something like 'template_abc123')
-        templateParams,
-        '4RQulCjXeHXEO8tH5'      // ✅ Your public key
-      );
-      alert(`Payslip emailed to ${employee.email}`);
-    } catch (err) {
-      console.error('Failed to send email:', err?.text || err?.message || JSON.stringify(err));
-      alert('Failed to send email. Check the console for more details.');
-    }
+    return emailjs.send(
+      'service_4rzlbw2',
+      'service_nxnq06e',
+      templateParams,
+      '4RQulCjXeHXEO8tH5'
+    );
   };
 
   const handleSendAllPayslips = async () => {
@@ -80,84 +70,77 @@ function EmployeeList() {
         await handleEmailPayslip(emp);
         console.log(`Payslip sent to ${emp.name}`);
       } catch (err) {
-        console.error(`Failed to send payslip to ${emp.name}`, err?.text || err?.message || JSON.stringify(err));
+        console.error(`Failed to send payslip to ${emp.name}`, err);
       }
     }
-    setIsSendingAll(false);
-    alert('All payslips sent!');
   };
 
   return (
     <div className="container mt-5">
-      <h2>Employee List</h2>
-
-      <button
-        className="btn btn-danger mb-3"
-        onClick={handleSendAllPayslips}
-        disabled={isSendingAll}
-      >
-        {isSendingAll ? 'Sending...' : 'Send All Payslips'}
-      </button>
-
-      <div className="table-responsive">
-        <table className="table table-striped">
-          <thead className="table-light">
-            <tr>
-              <th>Name</th>
-              <th>Position</th>
-              <th>Basic Salary</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {employees.map((emp) => (
-              <tr key={emp._id}>
-                <td>{emp.name}</td>
-                <td>{emp.position}</td>
-                <td>${emp.basicSalary}</td>
-                <td>
-                  <button className="btn btn-primary btn-sm" onClick={() => handleViewPayslip(emp)}>
-                    View Payslip
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h2>Employee List</h2>
+        <button className="btn btn-warning" onClick={handleSendAllPayslips}>
+          Send Payslip to All
+        </button>
       </div>
 
-      {/* Payslip Modal */}
-      {selectedEmployee && (
-        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-lg modal-dialog-centered">
-            <div className="modal-content" ref={payslipRef}>
-              <div className="modal-header">
-                <h5 className="modal-title">Payslip</h5>
-                <button type="button" className="btn-close" onClick={handleClosePayslip}></button>
-              </div>
-              <div className="modal-body">
-                <p><strong>Employee Name:</strong> {selectedEmployee.name}</p>
-                <p><strong>Position:</strong> {selectedEmployee.position}</p>
-                <p><strong>Department:</strong> {selectedEmployee.department}</p>
-                <p><strong>Employee ID:</strong> {selectedEmployee.employeeId}</p>
-                <hr />
-                <p><strong>Basic Salary:</strong> ${selectedEmployee.basicSalary}</p>
-                <p><strong>Allowances:</strong> ${selectedEmployee.allowance}</p>
-                <p><strong>Deductions:</strong> ${selectedEmployee.deduction}</p>
-                <hr />
-                <p><strong>Net Salary:</strong> ${selectedEmployee.netSalary}</p>
-                <p><strong>Payment Date:</strong> {new Date(selectedEmployee.paymentDate).toLocaleDateString()}</p>
-              </div>
-              <div className="modal-footer">
-                <button className="btn btn-primary" onClick={handleDownloadPayslip}>Download</button>
-                <button className="btn btn-success" onClick={handlePrintPayslip}>Print</button>
-                <button className="btn btn-warning" onClick={() => handleEmailPayslip()}>Email</button>
-                <button className="btn btn-secondary" onClick={handleClosePayslip}>Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <table className="table table-bordered table-hover">
+        <thead className="table-light">
+          <tr>
+            <th>Name</th>
+            <th>Employee ID</th>
+            <th>Email</th>
+            <th>Department</th>
+            <th>Position</th>
+            <th>Net Salary</th>
+            <th>Payment Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {employees.map((employee) => (
+            <tr key={employee._id} className={employee.status === 'inactive' ? 'table-secondary' : ''}>
+              <td>{employee.name}</td>
+              <td>{employee.employeeId}</td>
+              <td>{employee.email}</td>
+              <td>{employee.department}</td>
+              <td>{employee.position}</td>
+              <td>KES {employee.netSalary?.toLocaleString()}</td>
+              <td>{new Date(employee.paymentDate).toLocaleDateString()}</td>
+              <td>
+                <span className={`badge ${employee.status === 'inactive' ? 'bg-danger' : 'bg-success'}`}>
+                  {employee.status || 'active'}
+                </span>
+              </td>
+              <td>
+                <div className="d-flex flex-column gap-1">
+                  <a 
+                    href={`mailto:${employee.email}`} 
+                    className="btn btn-sm btn-outline-primary"
+                  >
+                    Send Email
+                  </a>
+                  <button 
+                    className="btn btn-sm btn-outline-success"
+                    onClick={() => navigate(`/payslip/${employee._id}`)}
+                  >
+                    View Payslip
+                  </button>
+                  {employee.status !== 'inactive' && (
+                    <button 
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => handleDeactivate(employee._id)}
+                    >
+                      Deactivate
+                    </button>
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
