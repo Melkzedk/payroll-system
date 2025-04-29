@@ -15,10 +15,12 @@ function EmployeeList() {
 
   const handleViewPayslip = (employee) => {
     setSelectedEmployee(employee);
+    document.body.style.overflow = 'hidden'; // prevent background scroll
   };
 
   const handleClosePayslip = () => {
     setSelectedEmployee(null);
+    document.body.style.overflow = 'auto'; // restore scroll
   };
 
   const handleDownloadPayslip = () => {
@@ -91,61 +93,62 @@ function EmployeeList() {
         {isSendingAll ? 'Sending...' : 'Send All Payslips'}
       </button>
 
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Position</th>
-            <th>Basic Salary</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {employees.map((emp) => (
-            <tr key={emp._id}>
-              <td>{emp.fullName}</td>
-              <td>{emp.position}</td>
-              <td>${emp.basicSalary}</td>
-              <td>
-                <button className="btn btn-primary btn-sm" onClick={() => handleViewPayslip(emp)}>
-                  View Payslip
-                </button>
-              </td>
+      <div className="table-responsive">
+        <table className="table table-striped">
+          <thead className="table-light">
+            <tr>
+              <th>Name</th>
+              <th>Position</th>
+              <th>Basic Salary</th>
+              <th>Action</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {employees.map((emp) => (
+              <tr key={emp._id}>
+                <td>{emp.fullName}</td>
+                <td>{emp.position}</td>
+                <td>${emp.basicSalary}</td>
+                <td>
+                  <button className="btn btn-primary btn-sm" onClick={() => handleViewPayslip(emp)}>
+                    View Payslip
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {/* Payslip Modal */}
       {selectedEmployee && (
-        <div className="p-4 mt-5 border rounded shadow print-section" ref={payslipRef}>
-          <h3 className="text-center mb-4">Payslip</h3>
-          <p><strong>Employee Name:</strong> {selectedEmployee.fullName}</p>
-          <p><strong>Position:</strong> {selectedEmployee.position}</p>
-          <p><strong>Department:</strong> {selectedEmployee.department}</p>
-          <p><strong>Employee ID:</strong> {selectedEmployee.employeeId}</p>
-          <hr />
-          <p><strong>Basic Salary:</strong> ${selectedEmployee.basicSalary}</p>
-          <p><strong>Allowances:</strong> ${selectedEmployee.allowances}</p>
-          <p><strong>Deductions:</strong> ${selectedEmployee.deductions}</p>
-          <hr />
-          <p><strong>Net Salary:</strong> ${selectedEmployee.netSalary}</p>
-          <p><strong>Payment Date:</strong> {new Date(selectedEmployee.paymentDate).toLocaleDateString()}</p>
-
-          {/* Buttons */}
-          <div className="mt-4">
-            <button className="btn btn-primary me-2" onClick={handleDownloadPayslip}>
-              Download Payslip
-            </button>
-            <button className="btn btn-success me-2" onClick={handlePrintPayslip}>
-              Print Payslip
-            </button>
-            <button className="btn btn-warning me-2" onClick={() => handleEmailPayslip()}>
-              Send Email
-            </button>
-            <button className="btn btn-secondary" onClick={handleClosePayslip}>
-              Close
-            </button>
+        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-lg modal-dialog-centered">
+            <div className="modal-content" ref={payslipRef}>
+              <div className="modal-header">
+                <h5 className="modal-title">Payslip</h5>
+                <button type="button" className="btn-close" onClick={handleClosePayslip}></button>
+              </div>
+              <div className="modal-body">
+                <p><strong>Employee Name:</strong> {selectedEmployee.fullName}</p>
+                <p><strong>Position:</strong> {selectedEmployee.position}</p>
+                <p><strong>Department:</strong> {selectedEmployee.department}</p>
+                <p><strong>Employee ID:</strong> {selectedEmployee.employeeId}</p>
+                <hr />
+                <p><strong>Basic Salary:</strong> ${selectedEmployee.basicSalary}</p>
+                <p><strong>Allowances:</strong> ${selectedEmployee.allowances}</p>
+                <p><strong>Deductions:</strong> ${selectedEmployee.deductions}</p>
+                <hr />
+                <p><strong>Net Salary:</strong> ${selectedEmployee.netSalary}</p>
+                <p><strong>Payment Date:</strong> {new Date(selectedEmployee.paymentDate).toLocaleDateString()}</p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-primary" onClick={handleDownloadPayslip}>Download</button>
+                <button className="btn btn-success" onClick={handlePrintPayslip}>Print</button>
+                <button className="btn btn-warning" onClick={() => handleEmailPayslip()}>Email</button>
+                <button className="btn btn-secondary" onClick={handleClosePayslip}>Close</button>
+              </div>
+            </div>
           </div>
         </div>
       )}
