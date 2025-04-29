@@ -7,7 +7,14 @@ function EmployeeList() {
   useEffect(() => {
     async function fetchEmployees() {
       const data = await employeeService.getEmployees();
-      setEmployees(data);
+
+      // ✅ Ensure it's an array
+      if (Array.isArray(data)) {
+        setEmployees(data);
+      } else {
+        console.error("Expected array, got:", data);
+        setEmployees([]); // fallback to empty array
+      }
     }
 
     fetchEmployees();
