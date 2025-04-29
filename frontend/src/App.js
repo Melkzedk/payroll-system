@@ -9,13 +9,17 @@ import EmployeeList from './pages/EmployeeList';
 function App() {
   return (
     <Router>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/add-employee" element={<AddEmployee />} />
-        <Route path="/employee-list" element={<EmployeeList />} />
-      </Routes>
-      <Footer />
+      <div className="d-flex flex-column min-vh-100">
+        <Navbar />
+        <div className="flex-grow-1">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/add-employee" element={<AddEmployee />} />
+            <Route path="/employee-list" element={<EmployeeList />} />
+          </Routes>
+        </div>
+        <Footer />
+      </div>
     </Router>
   );
 }
