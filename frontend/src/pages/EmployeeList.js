@@ -38,7 +38,7 @@ function EmployeeList() {
     window.location.reload();
   };
 
-  const handleEmailPayslip = (employee = selectedEmployee) => {
+  const handleEmailPayslip = async (employee = selectedEmployee) => {
     if (!employee) return;
 
     const templateParams = {
@@ -59,12 +59,18 @@ function EmployeeList() {
       `
     };
 
-    return emailjs.send(
-      'service_4rzlbw2',
-      'service_nxnq06e',
-      templateParams,
-      '4RQulCjXeHXEO8tH5'
-    );
+    try {
+      await emailjs.send(
+        'service_4rzlbw2',       // ✅ Your service ID
+        'service_nxnq06e',       // ❌ This looks like a wrong template ID (should be something like 'template_abc123')
+        templateParams,
+        '4RQulCjXeHXEO8tH5'      // ✅ Your public key
+      );
+      alert(`Payslip emailed to ${employee.email}`);
+    } catch (err) {
+      console.error('Failed to send email:', err?.text || err?.message || JSON.stringify(err));
+      alert('Failed to send email. Check the console for more details.');
+    }
   };
 
   const handleSendAllPayslips = async () => {
@@ -74,7 +80,7 @@ function EmployeeList() {
         await handleEmailPayslip(emp);
         console.log(`Payslip sent to ${emp.name}`);
       } catch (err) {
-        console.error(`Failed to send payslip to ${emp.name}`, err);
+        console.error(`Failed to send payslip to ${emp.name}`, err?.text || err?.message || JSON.stringify(err));
       }
     }
     setIsSendingAll(false);
