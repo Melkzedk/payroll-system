@@ -24,54 +24,18 @@ function EmployeeList() {
     alert('Payslips sent to all employees!');
   };
 
-  const handlePrintPayslip = () => {
-    const printContents = payslipRef.current.innerHTML;
-    const originalContents = document.body.innerHTML;
-
-    document.body.innerHTML = printContents;
-    window.print();
-    document.body.innerHTML = originalContents;
-    window.location.reload();
-  };
-
-  const handleEmailPayslip = (employee = selectedEmployee) => {
-    if (!employee) return;
-
-    const templateParams = {
-      to_name: employee.name,
-      to_email: employee.email,
-      message: `
-        Payslip Details:
-
-        Name: ${employee.name}
-        Position: ${employee.position}
-        Department: ${employee.department}
-        Employee ID: ${employee.employeeId}
-        Basic Salary: $${employee.basicSalary}
-        Allowances: $${employee.allowance}
-        Deductions: $${employee.deduction}
-        Net Salary: $${employee.netSalary}
-        Payment Date: ${new Date(employee.paymentDate).toLocaleDateString()}
-      `
-    };
-
-    return emailjs.send(
-      'service_4rzlbw2',
-      'service_nxnq06e',
-      templateParams,
-      '4RQulCjXeHXEO8tH5'
-    );
-  };
-
-  const handleSendAllPayslips = async () => {
-    setIsSendingAll(true);
-    for (const emp of employees) {
-      try {
-        await handleEmailPayslip(emp);
-        console.log(`Payslip sent to ${emp.name}`);
-      } catch (err) {
-        console.error(`Failed to send payslip to ${emp.name}`, err);
-      }
+  const handleDeactivate = async (employeeId) => {
+    try {
+      await employeeService.deactivateEmployee(employeeId);
+      alert(`Employee ${employeeId} deactivated.`);
+      setEmployees((prev) =>
+        prev.map(emp =>
+          emp._id === employeeId ? { ...emp, status: 'inactive' } : emp
+        )
+      );
+    } catch (err) {
+      alert('Failed to deactivate employee.');
+      console.error(err);
     }
   };
 

@@ -16,9 +16,11 @@ const getEmployeeById = async (id) => {
 
 const deactivateEmployee = (id) => axios.patch(`${API_URL}/${id}/deactivate`);
 
-export default {
+const employeeService = {
   addEmployee,
   getEmployees,
-  getEmployeeById,     // ✅ Added for Payslip page
-  deactivateEmployee   // ✅ Already included
+  getEmployeeById,
+  deactivateEmployee
 };
+
+export default employeeService;
